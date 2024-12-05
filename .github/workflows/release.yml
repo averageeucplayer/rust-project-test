@@ -11,15 +11,25 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+
+      - name: Cache Node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: web/node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
       - name: NPM install
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: |
           cd web
           npm install
@@ -29,25 +39,35 @@ jobs:
           cd web
           npm run build
 
+      - name: Cache Rust
+        id: cache-rust
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/rust-toolchain') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        if: steps.cache-rust.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@1.82.0
+
+      - name: Setup Tauri
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          toolchain: stable
+          tagName: app-v__VERSION__
+          releaseName: "App v__VERSION__"
+          releaseBody: "See the assets to download this version and install."
+          releaseDraft: true
+          prerelease: false
 
-      - name: Install Tauri CLI
-        run: |
-          rustup target add x86_64-pc-windows-msvc
-          cargo install tauri-cli
-
-      - name: Build App
-        run: |
-          cargo tauri build --release
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: tauri-build
-          path: target/release/bundle/
+      # - name: Upload Artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: tauri-build
+      #     path: target/release/bundle/
 
   release:
     name: Release
