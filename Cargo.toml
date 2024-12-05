@@ -3,5 +3,5 @@ members = [
     "app",
     "lib",
 ]
-
+resolver = "2"
 default-members = ["app"]
