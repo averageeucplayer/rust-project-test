@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build Tauri App
+    name: Build And Release
     runs-on: windows-latest
     permissions:
       contents: write
@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo
-          key: ${{ runner.os }}-rust-${{ hashFiles('**/rust-toolchain') }}
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-rust-
 
@@ -54,39 +54,14 @@ jobs:
         if: steps.cache-rust.outputs.cache-hit != 'true'
         uses: dtolnay/rust-toolchain@1.82.0
 
-      - name: Setup Tauri
+      - name: Build and Release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__
-          releaseName: "App v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
+          includeRelease: true
+          tagName: ${{ github.ref_name }}
+          releaseName: "Release ${{ github.ref_name }}"
+          releaseBody: "See the assets below to download this version and install."
+          releaseDraft: false
           prerelease: false
-
-      # - name: Upload Artifacts
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: tauri-build
-      #     path: target/release/bundle/
-
-  release:
-    name: Release
-    needs: build
-    runs-on: windows-latest
-
-    steps:
-      - name: Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: tauri-build
-
-      - name: GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: |
-            src-tauri/target/release/bundle/**/*.*
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref_name }}
-          releaseName: Release ${{ github.ref_name }}
