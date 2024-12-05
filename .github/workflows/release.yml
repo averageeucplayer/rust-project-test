@@ -1,0 +1,70 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build Tauri App
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: NPM install
+        run: |
+          cd web
+          npm install
+
+      - name: Build web
+        run: |
+          cd web
+          npm run build
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install Tauri CLI
+        run: |
+          rustup target add x86_64-pc-windows-msvc
+          cargo install tauri-cli
+
+      - name: Build App
+        run: |
+          cargo tauri build --release
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: tauri-build
+          path: target/release/bundle/
+
+  release:
+    name: Release
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+      - name: Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: tauri-build
+
+      - name: GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            src-tauri/target/release/bundle/**/*.*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          releaseName: Release ${{ github.ref_name }}
