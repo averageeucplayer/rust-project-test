@@ -1,14 +1,43 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use std::sync::Arc;
+use serde::Serialize;
+
+#[derive(Serialize)]
+pub struct Record {
+    id: u64,
+    name: String
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub struct DefaultRecordManager {}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+pub trait RecordManager: Send + Sync + 'static {
+    fn get_records(&self) -> Vec<Record>;
+}
+
+impl RecordManager for DefaultRecordManager {
+    fn get_records(&self) -> Vec<Record> {
+        vec![
+            Record{
+                id: 1,
+                name: "test".to_string(),
+            },
+            Record{
+                id: 2,
+                name: "test".to_string(),
+            },
+            Record{
+                id: 3,
+                name: "test".to_string(),
+            }
+        ]
     }
 }
+
+impl DefaultRecordManager {
+    pub fn new() -> Self {
+        Self {
+
+        }
+    }
+}
+
+pub type SharedRecordManager = Arc<dyn RecordManager>;
