@@ -1,13 +1,27 @@
 import { defineConfig } from "vite";
 import { sveltekit } from "@sveltejs/kit/vite";
 
-// @ts-expect-error process is a nodejs global
+// process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
-// https://vitejs.dev/config/
 export default defineConfig(async () => ({
   plugins: [sveltekit()],
-
+	resolve: process.env.VITEST
+		? {
+				conditions: ['browser']
+			}
+		: undefined,
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ["./setupTests.js"],
+    coverage: {
+      reporter: ['lcov'],
+      include: [
+        'src/**', // Ensure source files are included
+      ],
+    }
+  },
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent vite from obscuring rust errors
