@@ -1,6 +1,12 @@
 name: Tests and Code Coverage
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - '**/*.rs'
+  pull_request:
+    paths:
+      - '**/*.rs'
 
 jobs:
   tests_and_code_coverage:
