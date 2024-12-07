@@ -5,7 +5,7 @@ on:
     paths:
       - 'docs/**/*.md'
     branches:
-      - main 
+      - master 
 
 jobs:
   update_docs:
