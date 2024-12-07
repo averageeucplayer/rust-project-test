@@ -1,5 +1,0 @@
-target/
-Cargo.lock
-!/Cargo.lock
-*.ps1
-lcov.info
