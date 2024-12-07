@@ -4,10 +4,14 @@ on:
   push:
     paths:
       - '**/*.rs'
+    branches:
+      - master 
   pull_request:
     paths:
       - '**/*.rs'
-
+    branches:
+      - master 
+      
 jobs:
   tests_and_code_coverage:
     name: Tests and Code Coverage
