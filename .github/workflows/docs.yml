@@ -1,4 +1,4 @@
-name: Update docs
+name: Publish docs
 
 on:
   push:
@@ -9,10 +9,16 @@ on:
 
 jobs:
   update_docs:
-    name: Check changes
+    name: Publish docs
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v1
+      - name: Build docs
+        run: |
+          cd docs
+          mdbook build
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
