@@ -1,0 +1,31 @@
+name: Update docs
+
+on:
+  push:
+    paths:
+      - 'docs/**/*.md'
+    branches:
+      - main 
+
+jobs:
+  update_docs:
+    name: Check changes
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for changes in docs folder
+        id: check_changes
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^docs/.*\.md$'; then
+            echo "Markdown files in docs/ have changed."
+            echo "changes=true" >> $GITHUB_ENV
+          else
+            echo "No Markdown files changed in docs/."
+            echo "changes=false" >> $GITHUB_ENV
+          fi
+      - name: Deploy to GitHub Pages
+        if: env.changes == 'true'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build 

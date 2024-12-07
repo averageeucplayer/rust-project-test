@@ -1,24 +1,27 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+    import { type Record, getRecords } from "web-lib";
+    import { onMount } from "svelte";
+    import { Button } from "web-component";
+    let items = $state<Record[]>([]);
 
-  let name = $state("");
-  let greetMsg = $state("");
+  onMount(() => {
+    (async () => {
+        items = await getRecords();
+    })();
 
-  async function greet(event: Event) {
-    event.preventDefault();
-    greetMsg = await invoke("greet", { name });
-  }
+  })
+
 </script>
 
-<main class="container">
+<div class="container">
+    <Button>
+      Test
+    </Button>
+    <ul>
+    {#each items as item}
+        <li>{item}</li>
+    {/each}
+    </ul>
 
-  <form class="row" onsubmit={greet}>
-    <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
-    <button type="submit">Greet</button>
-  </form>
-  <p>{greetMsg}</p>
-</main>
-
-<style>
-
-</style>
+  
+</div>

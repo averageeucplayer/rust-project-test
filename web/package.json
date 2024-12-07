@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "vitest": "vitest",
+    "test": "vitest",
     "coverage": "vitest run --coverage"
   },
   "license": "MIT",
@@ -18,7 +18,8 @@
     "@tauri-apps/plugin-log": "^2.0.1",
     "@tauri-apps/plugin-shell": "^2",
     "@tauri-apps/plugin-updater": "^2.0.0",
-    "web-lib": "file:../web-lib"
+    "web-lib": "file:../web-lib",
+    "web-component": "file:../web-component"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -50,6 +51,6 @@
     "tslib": "^2.8.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.8"
   }
 }

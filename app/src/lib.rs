@@ -1,5 +1,8 @@
 mod handlers;
 mod setup_app;
+mod updater;
+mod background_worker;
+mod abstractions;
 
 use std::panic;
 

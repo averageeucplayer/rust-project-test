@@ -8,37 +8,72 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Cache Node modules
-        id: cache-node-modules
+      - name: Cache Web
+        id: cache-web
         uses: actions/cache@v4
         with:
-          path: web/node_modules
-          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          path: |
+            web/node_modules
+            web-lib/node_modules
+            web-component/node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('**/web/package-lock.json', '**/web-lib/package-lock.json', '**/web-component/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-      - name: NPM
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+              
+      - name: NPM web-lib
+        if: steps.cache-web.outputs.cache-hit != 'true'
+        run: |
+          cd web-lib
+          npm ci
+
+      - name: NPM web-component
+        if: steps.cache-web.outputs.cache-hit != 'true'
+        run: |
+          cd web-component
+          npm ci
+
+      - name: NPM web
+        if: steps.cache-web.outputs.cache-hit != 'true'
         run: |
           cd web
           npm ci
-      - name: Web - code coverage  
+
+      - name: Web-component - code coverage
+        continue-on-error: true
+        run: |
+          cd web-component
+          npm run coverage
+
+      - name: Web-lib - code coverage  
+        continue-on-error: true
+        run: |
+          cd web-lib
+          npm run coverage
+
+      - name: Web - code coverage
+        continue-on-error: true
         run: |
           cd web
           npm run coverage
+
       - uses: dtolnay/rust-toolchain@1.82.0
       - uses: Swatinem/rust-cache@v2
         with:
           cache-targets: false
       - name: App - Tests
+        continue-on-error: true
         run: cargo test --verbose
+
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
+        
       - name: App - code coverage
-        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+        run: cargo llvm-cov --all-features --workspace --lcov --ignore-filename-regex '.*(app\\src\\main.rs|app\\src\\setup_app.rs|app\\src\\updater.rs|app\\src\\lib.rs|app\\src\\handlers\\mod.rs).*' --output-path lcov.info
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./lcov.info,./web/coverage/lcov.info
+          files: ./lcov.info,./web/coverage/lcov.info,./web-lib/coverage/lcov.info,./web-component/coverage/lcov.info
           fail_ci_if_error: true

@@ -3,7 +3,15 @@
   "version": "0.1.0",
   "description": "",
   "type": "module",
-  "scripts": {},
+  "main": "dist/index.js", 
+  "exports": {
+    ".": "./dist/index.js",
+    "./types": "./dist/index.d.ts"
+  },
+  "types": "dist/index.d.ts",  
+  "scripts": {
+    "build": "tsup"
+  },
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -12,6 +20,8 @@
     "@tauri-apps/plugin-updater": "^2.0.0"
   },
   "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
     "user-agent-data-types": "^0.4.2"
   }
 }
