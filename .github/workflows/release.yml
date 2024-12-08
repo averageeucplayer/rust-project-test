@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-    branches:
-      - master 
 
 jobs:
   build:
@@ -26,17 +24,42 @@ jobs:
         id: cache-node-modules
         uses: actions/cache@v4
         with:
-          path: web/node_modules
-          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          path: |
+            web/node_modules
+            web-lib/node_modules
+            web-component/node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('**/web/package-lock.json', '**/web-lib/package-lock.json', '**/web-component/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: NPM
+      - name: NPM Web-lib
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: |
+          cd web-lib
+          npm ci
+
+      - name: NPM Web-component
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: |
+          cd web-component
+          npm ci      
+
+      - name: NPM Web
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: |
           cd web
           npm ci
+
+      - name: Build web-lib
+        run: |
+          cd web-lib
+          npm run build
+
+      - name: Build web-component
+        run: |
+          cd web-lib
+          npm run build
 
       - name: Build web
         run: |

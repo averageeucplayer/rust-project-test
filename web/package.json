@@ -4,8 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
+    "dev": "vite dev --mode development",
+    "build:dev": "vite build --mode development",
+    "build:prod": "vite build --mode production]",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -19,11 +20,13 @@
     "@tauri-apps/plugin-shell": "^2",
     "@tauri-apps/plugin-updater": "^2.0.0",
     "web-lib": "file:../web-lib",
-    "web-component": "file:../web-component"
+    "web-component": "file:../web-component",
+    "web-core": "file:../web-core"
   },
   "devDependencies": {
+    "web-fake": "file:../web-fake",
     "@jest/globals": "^29.7.0",
-    "@sveltejs/adapter-static": "^3.0.5",
+    "@sveltejs/adapter-static": "^3.0.6",
     "@sveltejs/kit": "^2.7.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@tauri-apps/cli": "^2",

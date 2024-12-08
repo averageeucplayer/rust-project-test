@@ -14,7 +14,7 @@ on:
       
 jobs:
   tests_and_code_coverage:
-    name: Tests and Code Coverage
+    name: CI
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4

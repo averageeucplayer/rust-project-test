@@ -6,24 +6,24 @@ import typescript from "@rollup/plugin-typescript";
 import json from '@rollup/plugin-json';
 
 const { default: { name: pkg_name, module, main }} = await import('./package.json', { with: { type: "json" }, });
+const development = process.env.NODE_ENV == "development";
+// const production = !process.env.ROLLUP_WATCH
 
 const name = pkg_name
 	.replace(/^(@\S+\/)?(svelte-)?(\S+)/, '$3')
 	.replace(/^\w/, m => m.toUpperCase())
 	.replace(/-\w/g, m => m[1].toUpperCase());
 
-const production = !process.env.ROLLUP_WATCH
-
 export default {
 	input: 'src/index.ts',
 	output: [
         {
-            sourcemap: true,
+            sourcemap: development,
             format: 'cjs',
             file: main,
         },
         {
-            sourcemap: true,
+            sourcemap: development,
             format: 'esm',
             file:  module,
         }
@@ -32,9 +32,9 @@ export default {
 		svelte({
             preprocess: sveltePreprocess({ sourceMap: true }),
             compilerOptions: {
-                dev: !production
+                dev: development
             },
-            emitCss: false,
+            emitCss: true,
         }),
         resolve({
             browser: true,

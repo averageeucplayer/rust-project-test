@@ -5,6 +5,5 @@ node_modules
 .env
 .env.*
 !.env.example
-/.svelte-kit
 dist
 coverage

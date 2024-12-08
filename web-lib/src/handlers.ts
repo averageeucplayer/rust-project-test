@@ -1,4 +1,4 @@
 import { invoke } from '@tauri-apps/api/core';
-import { AppRecord } from './types';
+import { AppRecord } from 'web-core';
 
-export const getRecords = async () => await invoke<AppRecord[]>("get_records");
+export const getRecords = async () => await invoke<AppRecord[]>("get_records"); 

@@ -3,5 +3,5 @@
 </script>
   
 <button on:click={onClick}>
-	<slot></slot>
+	<slot />
 </button>
