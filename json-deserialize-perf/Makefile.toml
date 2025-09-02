@@ -1,0 +1,24 @@
+[tasks.build-release]
+description = "Build the project in debug mode and copy the binary"
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.copy-assets]
+script_runner = "powershell"
+script_extension = "ps1"
+script = [
+'''
+$source = ".\\meter-data\*"
+$destination = ".\\target\\debug\\meter-data"
+
+Write-Host "Copying binary from $source to $destination"
+Copy-Item -Path $source -Destination $destination -Force
+'''
+]
+dependencies = ["build-release"]
+
+[tasks.bench]
+description = "Run cargo bench in release mode"
+command = "cargo"
+args = ["bench"]
+dependencies = ["copy-assets"]
