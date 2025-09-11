@@ -1,0 +1,65 @@
+pub struct ThreadImpersonation {
+    token: Option<HANDLE>,
+    error_code: Option<u32>,
+    failed_to_open_token: bool,
+    has_impersonated: bool,
+}
+
+impl ThreadImpersonation {
+    pub fn new() -> Self {
+        unsafe {
+            let mut token_handle: HANDLE = null_mut();
+            let mut impersonated = false;
+            let mut failed_to_open_token = false;
+            let process_id = GetCurrentProcess();
+            let desired_access = TOKEN_QUERY | TOKEN_DUPLICATE;
+            let mut error_code = None;
+
+            if OpenProcessToken(process_id, desired_access, &mut token_handle) != 0 {
+                info!("token: {:?}", token_handle);
+
+                if ImpersonateLoggedOnUser(token_handle) != 0 {
+                    impersonated = true;
+                }
+                else {
+                    let code = winapi::um::errhandlingapi::GetLastError();
+                    error_code = Some(code);
+                }
+            }
+            else {
+                failed_to_open_token = true;
+            }
+
+            ThreadImpersonation {
+                token: Some(token_handle),
+                error_code,
+                failed_to_open_token,
+                has_impersonated: impersonated,
+            }
+        }
+    }
+
+    pub fn failed_to_open_token(&self) -> bool {
+        self.failed_to_open_token
+    }
+
+    pub fn is_impersonated(&self) -> bool {
+        self.has_impersonated
+    }
+}
+
+impl Drop for ThreadImpersonation {
+    fn drop(&mut self) {
+        unsafe {
+            if self.has_impersonated {
+                info!("reverting to self");
+                RevertToSelf();
+            }
+
+            if let Some(token) = self.token.take() {
+                info!("closing handle");
+                CloseHandle(token);
+            }
+        }
+    }
+}

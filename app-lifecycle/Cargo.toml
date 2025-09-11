@@ -1,0 +1,9 @@
+[workspace]
+resolver = "3"
+members = [
+    "src-tauri",
+    "tcp-client-server",
+    "ipc-server",
+    "shell-exec-test",
+    "ipc-client-test"
+]

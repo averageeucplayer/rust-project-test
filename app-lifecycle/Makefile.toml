@@ -1,0 +1,100 @@
+[env]
+IP_ADDR = "192.168.1.70"
+# IP_ADDR = "127.0.0.1"
+PORT = "42069"
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+IPC_FILTER = "src port 42069"
+# IPC_FILTER = "tcp and src port 42069"
+# IPC_FILTER_WINDIVERT = "inbound && tcp.SrcPort == 42069"
+IPC_FILTER_WINDIVERT = "outbound && tcp.SrcPort == 42069"
+
+[tasks.dev]
+env = { "RUSTFLAGS"= "-Awarnings" }
+run_task = { name = ["tcp-server", "ipc-server-windivert", "tauri-dev"], parallel = true }
+
+[tasks.tauri-dev]
+command = "cargo"
+env = { "FILTER" = "${IPC_FILTER_WINDIVERT}" }
+args    = ["tauri", "dev"]
+
+[tasks.dev-ncap]
+env = { "RUSTFLAGS"= "-Awarnings" }
+run_task = { name = ["tcp-server", "ipc-server-ncap"], parallel = true }
+
+[tasks.dev-windivert]
+env = { "RUSTFLAGS"= "-Awarnings" }
+run_task = { name = ["tcp-server", "ipc-server-windivert"], parallel = true }
+
+[tasks.tcp-server]
+command = "cargo"
+args    = ["run", "-p", "tcp-client-server", "--", "--ip-addr" , "${IP_ADDR}", "--port", "${PORT}"]
+
+[tasks.ipc-server-windivert]
+command = "cargo"
+args = [
+    "run",
+    "-p", "ipc-server",
+    "--features", "windivert",
+    "--",
+    "--filter", "${IPC_FILTER_WINDIVERT}"
+]
+
+[tasks.ipc-server-windivert-dry]
+command = "cargo"
+args = [
+    "run",
+    "-p", "ipc-server",
+    "--features", "windivert",
+    "--",
+    "--filter", "${IPC_FILTER_WINDIVERT}",
+    "--test"
+]
+
+[tasks.ipc-server-windivert-test]
+run_task = { name = ["tcp-server", "ipc-server-windivert-dry"], parallel = true }
+
+[tasks.ipc-server-ncap]
+command = "cargo"
+args = [
+    "run",
+    "-p", "ipc-server",
+    "--features", "pcap",
+    "--",
+    "--filter", "${IPC_FILTER}"
+]
+
+[tasks.ipc-server-ncap-dry]
+command = "cargo"
+args = [
+    "run",
+    "-p", "ipc-server",
+    "--features", "pcap",
+    "--",
+    "--filter", "${IPC_FILTER}",
+    "--test"
+]
+
+[tasks.ipc-server-ncap-test]
+run_task = { name = ["tcp-server", "ipc-server-ncap-dry"], parallel = true }
+
+[tasks.build-ipc-server]
+command = "cargo"
+args = [
+    "build",
+    "-p", "ipc-server",
+    "--features", "windivert"
+]
+
+[tasks.copy-ipc-server]
+script_runner = "powershell"
+script_extension = "ps1"
+script = [
+'''
+$source = ".\\ipc-server\\target\\debug\\peanalyse.exe"
+$destination = ".\\src-tauri\\target\\debug\\peanalyse.exe"
+
+Write-Host "Copying binary from $source to $destination"
+Copy-Item -Path $source -Destination $destination -Force
+'''
+]
+dependencies = ["build-ipc-server"]
