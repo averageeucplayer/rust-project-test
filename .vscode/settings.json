@@ -1,6 +1,8 @@
 {
 	"rust-analyzer.linkedProjects": [
     	"json-deserialize-perf/Cargo.toml",
-		"app-lifecycle/Cargo.toml"
+		"app-lifecycle/Cargo.toml",
+		"app-broadcast/src-tauri/Cargo.toml",
+		"refinery-vs-custom/Cargo.toml"
   ]
 }

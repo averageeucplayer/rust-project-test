@@ -1,0 +1,10 @@
+[package]
+name = "refinery-vs-custom"
+version = "0.8.12"
+edition = "2024"
+
+[dependencies]
+refinery = { version = "0.8.16", features = ["rusqlite-bundled"]}
+refinery-core = { version = "0.8.16", features = []}
+rusqlite = { version = "0.33.0", features = ["bundled", "serde_json"] }
+log = "0.4"
