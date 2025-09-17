@@ -1,0 +1,46 @@
+[tasks.package_zip]
+description = "Zip folder and copy to build target"
+script_runner = "powershell"
+script_extension = "ps1"
+script = [
+'''
+    $Folder = "migrations"
+    $ArchiveName = "$Folder.7z"
+
+    if ($env:CARGO_MAKE_TASK -eq "release") {
+        $TargetDir = "src-tauri/target/release"
+    } else {
+        $TargetDir = "src-tauri/target/debug"
+    }
+
+    if (-not (Test-Path $TargetDir)) {
+        New-Item -ItemType Directory -Path $TargetDir | Out-Null
+    }
+
+    $ArchiveName = "$TargetDir\\$Folder.7z"
+
+    7z a $ArchiveName $Folder
+
+    Write-Host "Archive created at $ArchiveName"
+'''
+]
+
+[tasks.package_zip_debug]
+description = "Zip folder and copy to target/debug"
+dependencies = ["package_zip"]
+env = { CARGO_MAKE_TASK = "debug" }
+
+[tasks.package_zip_release]
+description = "Zip folder and copy to target/release"
+dependencies = ["package_zip"]
+env = { CARGO_MAKE_TASK = "release" }
+
+[tasks.tauri-dev]
+command = "cargo"
+args    = ["tauri", "dev"]
+dependencies = ["package_zip_debug"]
+
+[tasks.release]
+command = "cargo"
+args    = ["tauri", "build"]
+dependencies = ["package_zip_release"]
